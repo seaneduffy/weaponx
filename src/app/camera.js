@@ -40,6 +40,7 @@ export default class Camera {
 		}
 	}
 	updatePosition(oldPosition, newPosition, target) {
+		return target.copy(newPosition);
 		const distance = oldPosition.distanceTo(newPosition);
 		if (distance <= this.speed) {
 			return target.copy(newPosition);

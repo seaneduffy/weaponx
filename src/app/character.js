@@ -76,7 +76,7 @@ export default class Character {
 		} else if (state === Character.ANIMATION_STATE.RUNNING) {
 			this.currAnimation = this.actions.RunCycle;
 		} else if (state === Character.ANIMATION_STATE.STANDING) {
-			this.currAnimation = this.actions.StandCycle;
+			this.currAnimation = this.actions.StandingCycle;
 		}
 		this.currAnimation.play();
 	}
