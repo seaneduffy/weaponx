@@ -1,0 +1,4 @@
+.DS_Store
+*.glb
+*.gltf
+node_modules/
