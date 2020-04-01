@@ -11,12 +11,15 @@ export default class Camera {
 		this.tanFOV = Math.tan(((Math.PI / 180 ) * this.camera.fov / 2));
 		this.ogWindowHeight = window.innerHeight;
 		this.camera.position.set(0, 2, 12);
-		this.speed = 1;
+		this.speed = 0.7;
 		this.followDistance = 14;
-		this.followHeight = 7;
-		this.lookAtHeight = 3;
+		this.followHeight = 4;
+		this.lookAtHeight = 0.5;
 		this.lookAtVector = new THREE.Vector3();
-		window.camera = this.camera;
+		window.camera = this;
+		window.updateCamera = () => {
+			this.update();
+		};
 	}
 	updateViewport() {
 		this.camera.aspect = window.innerWidth / window.innerHeight;
@@ -28,19 +31,23 @@ export default class Camera {
 	}
 	update() {
 		if (this.characterFollowing) {
+			this.tmpVec1.set(0, 0, 0);
+			this.tmpVec2.set(0, 0, 0);
+			this.tmpVec3.set(0, 0, 0);
+			this.tmpVec4.set(0, 0, 0);
 			const characterPosition = this.characterFollowing.scene.getWorldPosition(this.tmpVec1);
 			const characterDirection = this.characterFollowing.scene.getWorldDirection(this.tmpVec2);
 			const followPosition = characterDirection.negate().multiplyScalar(this.followDistance);
 			followPosition.y += this.followHeight;
-			const lookAtPosition = this.tmpVec3.copy(this.characterFollowing.scene.position);
+			followPosition.add(characterPosition);
+			const lookAtPosition = this.tmpVec3.copy(characterPosition);
 			lookAtPosition.y += this.lookAtHeight;
-			this.lookAtVector = this.updatePosition(this.lookAtVector, lookAtPosition, this.lookAtVector);
+			this.lookAtVector.copy(lookAtPosition);
 			this.camera.position.copy(this.updatePosition(this.camera.position, followPosition, this.tmpVec4));
 			this.camera.lookAt(this.lookAtVector);
 		}
 	}
 	updatePosition(oldPosition, newPosition, target) {
-		return target.copy(newPosition);
 		const distance = oldPosition.distanceTo(newPosition);
 		if (distance <= this.speed) {
 			return target.copy(newPosition);

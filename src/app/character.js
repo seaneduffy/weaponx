@@ -82,11 +82,11 @@ export default class Character {
 	}
 
 	turnRight() {
-		this.scene.rotation.y += this.turnSpeed;
+		this.scene.rotation.y -= this.turnSpeed;
 	}
 
 	turnLeft() {
-		this.scene.rotation.y -= this.turnSpeed;
+		this.scene.rotation.y += this.turnSpeed;
 	}
 
 	walkForward() {

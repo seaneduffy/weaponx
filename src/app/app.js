@@ -16,21 +16,24 @@ export default class App {
 
 		this.animationObjects = [];
 
-		this.light1 = new THREE.AmbientLight(0xffffff);
+		this.light1 = new THREE.PointLight(0x2819e1, 1);
+		this.light2 = new THREE.PointLight(0xffffff, 1);
+		this.light1.position.set(1000, 0, 0);
+		this.light2.position.set(-1000, 0, 0);
+		this.light1.lookAt(0, 0, 0);
+		this.light2.lookAt(0, 0, 0);
 		this.scene.add(this.light1);
-		this.light2 = new THREE.PointLight(0xffffff, 1, 100);
-		this.light2.position.set(0, 4, -10);
 		this.scene.add(this.light2);
 		this.renderer.setClearColor(0x808080);
 		this.character = new Character();
 		this.character.loadModel('/weaponx.glb').then(() => {
 			this.scene.add(this.character.scene);
 			this.animationObjects.push(this.character);
-			this.character.scene.lookAt(1, 0, -1);
 			this.camera.followCharacter(this.character);
 			this.character.setWalkSpeed(0.04);
 			this.character.setWalkSpeed(0.08);
-			this.character.setTurnSpeed(Math.PI / 80);
+			this.character.setTurnSpeed(Math.PI / 50);
+			this.tick();
 		});
 		this.walking = false;
 		this.running = false;
@@ -38,6 +41,8 @@ export default class App {
 		this.turningRight = false;
 		this.shiftDown = false;
 		this.forwardDown = false;
+		this.stopCameraFollowingTimeout = null;
+		this.cameraFollowing = false;
 		window.character = this.character;
 		document.body.addEventListener('keydown', (key) => {
 			if (key.code === 'KeyW') {
@@ -47,6 +52,7 @@ export default class App {
 				} else {
 					this.walking = true;
 				}
+				this.startCameraFollowing();
 			} else if (key.code === 'KeyS') {
 				//
 			} else if (key.code === 'KeyA') {
@@ -66,6 +72,8 @@ export default class App {
 				this.running = false;
 				this.walking = false;
 				this.character.stopMoving();
+				console.log('b');
+				this.stopCameraFollowing();
 			} else if (key.code === 'KeyS') {
 				//
 			} else if (key.code === 'KeyA') {
@@ -86,7 +94,22 @@ export default class App {
 		// var dracoLoader = new DRACOLoader();
 		// dracoLoader.setDecoderPath( '/examples/jsm/libs/draco/' );
 		// loader.setDRACOLoader( dracoLoader );
-		this.tick();
+	}
+	startCameraFollowing() {
+		this.cameraFollowing = true;
+		if (this.stopCameraFollowingTimeout) {
+			clearTimeout(this.stopCameraFollowingTimeout);
+			this.stopCameraFollowingTimeout = null;
+		}
+	}
+	stopCameraFollowing() {
+		if (this.stopCameraFollowingTimeout) {
+			return;
+		}
+		this.stopCameraFollowingTimeout = setTimeout(() => {
+			this.cameraFollowing = false;
+			this.stopCameraFollowingTimeout = null;
+		}, 1000);
 	}
 	tick() {
 		if (this.running) {
@@ -100,7 +123,9 @@ export default class App {
 		if (this.turningRight) {
 			this.character.turnRight();
 		}
-		this.camera.update();
+		if (this.cameraFollowing) {
+			this.camera.update();
+		}
 		const delta = this.clock.getDelta();
 		this.animationObjects.forEach((animationObject) => {
 			if (animationObject.animationsActive) {
