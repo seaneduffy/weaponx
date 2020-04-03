@@ -41,7 +41,7 @@ export default class Camera {
 			followPosition.y += this.followHeight;
 			followPosition.add(characterPosition);
 			const lookAtPosition = this.tmpVec3.copy(characterPosition);
-			lookAtPosition.y += this.lookAtHeight;
+			lookAtPosition.y = this.lookAtHeight;
 			this.lookAtVector.copy(lookAtPosition);
 			this.camera.position.copy(this.updatePosition(this.camera.position, followPosition, this.tmpVec4));
 			this.camera.lookAt(this.lookAtVector);
