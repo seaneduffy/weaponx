@@ -110,7 +110,7 @@ class Control {
 				} else if (angle >= 13 * divisions && angle < 14 * divisions) {
 					direction = 'UL';
 				}
-				if (angle >= 15 & divisions || angle < 5 * divisions) {
+				if (angle >= 15 * divisions || angle < 5 * divisions) {
 					this.callHandlers(this.swipeRightHandlers, direction);
 				} else {
 					this.callHandlers(this.swipeLeftHandlers, direction);

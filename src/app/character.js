@@ -144,7 +144,8 @@ export default class Character {
 						}
 					};
 					baseSwipeAnimations.forEach((animName) => {
-						const append = animName[animName.length - 1];
+						let append = animName[animName.length - 1];
+						append = append === 'R' ? 'L' : 'R';
 						this.gltf.animations.forEach((anim) => {
 							if (anim.name === animName) {
 								bonesForSwipe.forEach(bone => {
@@ -232,12 +233,8 @@ export default class Character {
 		} else if (state === Character.STATE.PUNCH_L) {
 			this.currAnimation = this.actions.PunchL;
 		} else if (state === Character.STATE.SWIPE_L) {
-			this.currAnimation = this.actions.SwipeR;
+			this.currAnimation = this.actions.SwipeL;
 		} else if (state === Character.STATE.SWIPE_R) {
-			this.currAnimation = this.actions.SwipeR;
-		} else if (state === Character.STATE.SWIPE_U) {
-			this.currAnimation = this.actions.SwipeR;
-		} else if (state === Character.STATE.SWIPE_D) {
 			this.currAnimation = this.actions.SwipeR;
 		}
 		this.currAnimation.play();
@@ -268,15 +265,16 @@ export default class Character {
 	}
 
 	swipeRight(direction) {
-		this.swipe('SWIPE_R', direction);
+		this.changeState(Character.STATE.SWIPE_R);
+		this.swipe('SwipeR', direction);
 	}
 
 	swipeLeft(direction) {
-		this.swipe('SWIPE_L', direction);
+		this.changeState(Character.STATE.SWIPE_L);
+		this.swipe('SwipeL', direction);
 	}
 
 	swipe(state, direction) {
-		this.changeState(Character.STATE[state]);
 		const action = this.actions[`${state}_${direction}`];
 		action.play();
 

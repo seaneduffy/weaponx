@@ -34,7 +34,7 @@ export default class App {
 			this.camera.followCharacter(this.character);
 			this.character.setWalkSpeed(0.04);
 			this.character.setWalkSpeed(0.08);
-			this.character.setTurnSpeed(Math.PI / 50);
+			this.character.setTurnSpeed(Math.PI / 30);
 			this.character.physicsObject = this.physics.addObject3d(this.character.scene, 'character');
 			this.tick();
 		});
