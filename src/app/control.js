@@ -161,6 +161,7 @@ class Control {
 			return touches;
 		};
 		document.body.addEventListener('touchmove', (e) => {
+			e.preventDefault();
 			let touches = parseTouches(e);
 			if (touches.joystickTouch) {
 				this.joystickPosition.set(touches.joystickTouch.clientX, touches.joystickTouch.clientY);
