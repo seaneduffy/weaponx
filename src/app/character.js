@@ -192,18 +192,18 @@ export default class Character {
 
 	update() {
 		let velChange;
-		if (control.state.forwardDown && !control.state.shiftDown) {
+		if ((control.state.forwardDown && !control.state.shiftDown) || (control.state.walkThresholdHit && !control.state.runThresholdHit)) {
 			velChange = this.scene.getWorldDirection(this.tmpVec1).multiplyScalar(this.walkSpeed);
-		} else if (control.state.forwardDown) {
+		} else if (control.state.forwardDown || control.state.runThresholdHit) {
 			velChange = this.scene.getWorldDirection(this.tmpVec1).multiplyScalar(this.runSpeed);
 		}
 		if (velChange) {
 			this.scene.position.add(velChange);
 		}
-		if (control.state.turnRightDown) {
+		if (control.state.turnRightDown || control.state.turnRightThresholdHit) {
 			this.scene.rotation.y -= this.turnSpeed;
 		}
-		if (control.state.turnLeftDown) {
+		if (control.state.turnLeftDown || control.state.turnLeftThresholdHit) {
 			this.scene.rotation.y += this.turnSpeed;
 		}
 	}

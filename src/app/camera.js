@@ -12,9 +12,9 @@ export default class Camera {
 		this.ogWindowHeight = window.innerHeight;
 		this.camera.position.set(0, 2, 12);
 		this.speed = 0.7;
-		this.followDistance = 14;
-		this.followHeight = 4;
-		this.lookAtHeight = 0.5;
+		this.followDistance = 17;
+		this.followHeight = 6;
+		this.lookAtHeight = 1;
 		this.lookAtVector = new THREE.Vector3();
 		window.camera = this;
 		window.updateCamera = () => {

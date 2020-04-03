@@ -14,7 +14,18 @@ class Control {
 			swipingLeft: false,
 			swipingUp: false,
 			swipingDown: false,
-			mouseDown: false
+			mouseDown: false,
+			joystickActive: false,
+			joystickWalkThresholdHit: false,
+			joystickRunThresholdHit: false,
+			joystickTurnLeftThresholdHit: false,
+			joystickTurnRightThresholdHit: false,
+			joystickAngle: 0,
+			swipeActive: false
+		};
+		this.joystickDimensions = {
+			width: 400,
+			height: 400
 		};
 		this.walkHandlers = [];
 		this.runHandlers = [];
@@ -31,6 +42,12 @@ class Control {
 		this.lastMousePosition = new THREE.Vector2();
 		this.firstMousePosition = new THREE.Vector2();
 		this.angleVec = new THREE.Vector2();
+		this.firstJoystickPosition = new THREE.Vector2();
+		this.joystickPosition = new THREE.Vector2();
+		this.joystickAngleVec = new THREE.Vector2();
+		this.joystickRunThreshold = 100;
+		this.joystickWalkThreshold = 30;
+		this.joystickTurnThreshold = 30;
 		document.body.addEventListener('keydown', (key) => {
 			if (key.code === 'KeyW') {
 				this.state.forwardDown = true;
@@ -80,6 +97,9 @@ class Control {
 		const mouseUpListener = () => {
 			document.body.removeEventListener('mousemove', mouseMoveListener);
 			document.body.removeEventListener('mouseup', mouseUpListener);
+			parseSwipe();
+		};
+		const parseSwipe = () => {
 			const dist = this.firstMousePosition.distanceTo(this.mousePosition);
 			if (dist >= 20) {
 				const divisions = Math.PI / 10;
@@ -125,6 +145,76 @@ class Control {
 			this.firstMousePosition.y = this.lastMousePosition.y = this.mousePosition.y = e.screenY;
 			document.body.addEventListener('mousemove', mouseMoveListener);
 			document.body.addEventListener('mouseup', mouseUpListener);
+		});
+		const parseTouches = (e) => {
+			const touches = {
+				joystickTouch: null,
+				swipeTouch: null
+			}
+			Array.from(e.touches).forEach(touch => {
+				if (touch.clientX < this.joystickDimensions.width && touch.clientY > window.innerHeight - this.joystickDimensions.height) {
+					touches.joystickTouch = touch;
+				} else {
+					touches.swipeTouch = touch;
+				}
+			});
+			return touches;
+		};
+		document.body.addEventListener('touchmove', (e) => {
+			let touches = parseTouches(e);
+			if (touches.joystickTouch) {
+				this.joystickPosition.set(touches.joystickTouch.clientX, touches.joystickTouch.clientY);
+				this.joystickAngleVec.subVectors(this.firstJoystickPosition, this.joystickPosition);
+				const runThresholdHit = this.joystickAngleVec.y >= this.joystickRunThreshold;
+				const walkThresholdHit = this.joystickAngleVec.y >= this.joystickWalkThreshold;
+				console.log(this.joystickAngleVec.x, this.joystickTurnThreshold);
+				this.state.turnLeftThresholdHit = this.joystickAngleVec.x >= this.joystickTurnThreshold;
+				this.state.turnRightThresholdHit = this.joystickAngleVec.x <= -this.joystickTurnThreshold;
+				if (!this.state.runThresholdHit && runThresholdHit) {
+					this.callHandlers(this.runHandlers);
+				} else if ((!this.state.walkThresholdHit || (this.state.runThresholdHit && !runThresholdHit)) && walkThresholdHit && !runThresholdHit) {
+					this.callHandlers(this.walkHandlers);
+				} else if ((this.state.runThresholdHit || this.state.runThresholdHit) && !runThresholdHit && !runThresholdHit) {
+					this.callHandlers(this.stopMovingHandlers);
+				}
+				this.state.runThresholdHit = runThresholdHit;
+				this.state.walkThresholdHit = walkThresholdHit;
+				// this.state.joystickRunThresholdHit = this.firstJoystickPosition.distanceTo(this.joystickPosition);
+				// this.state.joystickAngle = this.joystickAngleVec.angle();
+				// this.state.joystickAngle -= Math.PI / 2;
+				// if (this.state.joystickAngle < 0) {
+				// 	this.state.joystickAngle += 2 * Math.PI;
+				// }
+			}
+			if (touches.swipeTouch) {
+				this.mousePosition.set(touches.swipeTouch.clientX, touches.swipeTouch.clientY);
+			}
+		});
+		document.body.addEventListener('touchend', (e) => {
+			let touches = parseTouches(e);
+			if (!touches.joystickTouch && this.state.joystickActive) {
+				this.state.joystickActive = false;
+				this.callHandlers(this.stopMovingHandlers);
+				this.state.runThresholdHit = false;
+				this.state.walkThresholdHit = false;
+				this.state.turnLeftThresholdHit = false;
+				this.state.turnRightThresholdHit = false;
+			}
+			if (!touches.swipeTouch && this.state.swipeActive) {
+				this.state.swipeActive = false;
+				parseSwipe();
+			}
+		});
+		document.body.addEventListener('touchstart', (e) => {
+			let touches = parseTouches(e);
+			if (touches.joystickTouch) {
+				this.firstJoystickPosition.set(touches.joystickTouch.clientX, touches.joystickTouch.clientY);
+				this.state.joystickActive = true;
+			}
+			if (touches.swipeTouch) {
+				this.state.swipeActive = true;
+				this.firstMousePosition.set(touches.swipeTouch.clientX, touches.swipeTouch.clientY);
+			}
 		});
 	}
 	callHandlers(handlers, param) {
