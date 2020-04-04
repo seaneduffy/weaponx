@@ -79,96 +79,96 @@ export default class Character {
 						}
 					});
 					this.bones = tmpbones;
-					const baseSwipeAnimations = [
-						'SwipeR',
-						'SwipeL'
-					];
-					const bonesForSwipe = [
-						'HandControl',
-						'ElbowPoint',
-						'Hand',
-						'LowerArm',
-						'UpperArm',
-						'Digit_1_1',
-						'Digit_1_2',
-						'Digit_1_3',
-						'Digit_2_1',
-						'Digit_2_2',
-						'Digit_2_3',
-						'Digit_3_1',
-						'Digit_3_2',
-						'Digit_3_3',
-						'Digit_4_1',
-						'Digit_4_2',
-						'Digit_4_3',
-						'Digit_5_1',
-						'Digit_5_2',
-						'Digit_5_3',
-						'Shoulder'
-					];
-					const directions = [
-						'RU',
-						'R',
-						'RD',
-						'DL',
-						'D',
-						'DR',
-						'LU',
-						'L',
-						'LD',
-						'U',
-						'UL',
-						'UR'
-					];
-					const swipeTracks = '';
-					const removeTrack = (tracks, trackName) => {
-						let index;
-						tracks.forEach((track, i) => {
-							if (track.name === trackName) {
-								index = i;
-							}
-						});
-						if (typeof index === 'number') {
-							tracks.splice(index, 1);
-						}
-					};
-					const removeTrackInSet = (tracks, keepName) => {
-						let index;
-						tracks.forEach((track, i) => {
-							if (track.name === trackToRemoveName) {
-								index = i;
-							}
-						});
-						if (typeof index === 'number') {
-							tracks.splice(index, 1);
-						}
-					};
-					baseSwipeAnimations.forEach((animName) => {
-						let append = animName[animName.length - 1];
-						append = append === 'R' ? 'L' : 'R';
-						this.gltf.animations.forEach((anim) => {
-							if (anim.name === animName) {
-								bonesForSwipe.forEach(bone => {
-									removeTrack(anim.tracks, `${bone}${append}.position`);
-									removeTrack(anim.tracks, `${bone}${append}.quaternion`);
-								});
-							} else {
-								directions.forEach(direction => {
-									if (anim.name === `${animName}_${direction}`) {
-										const newTracks = [];
-										anim.tracks.forEach(track => {
-											bonesForSwipe.forEach(bone => {
-												if (track.name === `${bone}${append}.position` || track.name === `${bone}${append}.quaternion`) {
-													newTracks.push(track);
-												}
-											});
-										});
-										anim.tracks = newTracks;
-									}
-								});
-							}
-						});
-					});
+					// const baseSwipeAnimations = [
+					// 	'SwipeR',
+					// 	'SwipeL'
+					// ];
+					// const bonesForSwipe = [
+					// 	'HandControl',
+					// 	'ElbowPoint',
+					// 	'Hand',
+					// 	'LowerArm',
+					// 	'UpperArm',
+					// 	'Digit_1_1',
+					// 	'Digit_1_2',
+					// 	'Digit_1_3',
+					// 	'Digit_2_1',
+					// 	'Digit_2_2',
+					// 	'Digit_2_3',
+					// 	'Digit_3_1',
+					// 	'Digit_3_2',
+					// 	'Digit_3_3',
+					// 	'Digit_4_1',
+					// 	'Digit_4_2',
+					// 	'Digit_4_3',
+					// 	'Digit_5_1',
+					// 	'Digit_5_2',
+					// 	'Digit_5_3',
+					// 	'Shoulder'
+					// ];
+					// const directions = [
+					// 	'RU',
+					// 	'R',
+					// 	'RD',
+					// 	'DL',
+					// 	'D',
+					// 	'DR',
+					// 	'LU',
+					// 	'L',
+					// 	'LD',
+					// 	'U',
+					// 	'UL',
+					// 	'UR'
+					// ];
+					// const swipeTracks = '';
+					// const removeTrack = (tracks, trackName) => {
+					// 	let index;
+					// 	tracks.forEach((track, i) => {
+					// 		if (track.name === trackName) {
+					// 			index = i;
+					// 		}
+					// 	});
+					// 	if (typeof index === 'number') {
+					// 		tracks.splice(index, 1);
+					// 	}
+					// };
+					// const removeTrackInSet = (tracks, keepName) => {
+					// 	let index;
+					// 	tracks.forEach((track, i) => {
+					// 		if (track.name === trackToRemoveName) {
+					// 			index = i;
+					// 		}
+					// 	});
+					// 	if (typeof index === 'number') {
+					// 		tracks.splice(index, 1);
+					// 	}
+					// };
+					// baseSwipeAnimations.forEach((animName) => {
+					// 	let append = animName[animName.length - 1];
+					// 	append = append === 'R' ? 'L' : 'R';
+					// 	this.gltf.animations.forEach((anim) => {
+					// 		if (anim.name === animName) {
+					// 			bonesForSwipe.forEach(bone => {
+					// 				removeTrack(anim.tracks, `${bone}${append}.position`);
+					// 				removeTrack(anim.tracks, `${bone}${append}.quaternion`);
+					// 			});
+					// 		} else {
+					// 			directions.forEach(direction => {
+					// 				if (anim.name === `${animName}_${direction}`) {
+					// 					const newTracks = [];
+					// 					anim.tracks.forEach(track => {
+					// 						bonesForSwipe.forEach(bone => {
+					// 							if (track.name === `${bone}${append}.position` || track.name === `${bone}${append}.quaternion`) {
+					// 								newTracks.push(track);
+					// 							}
+					// 						});
+					// 					});
+					// 					anim.tracks = newTracks;
+					// 				}
+					// 			});
+					// 		}
+					// 	});
+					// });
 					this.animationMixer = new THREE.AnimationMixer(this.gltf.scene);
 					this.gltf.animations.forEach((anim) => {
 						this.actions[anim.name] = this.animationMixer.clipAction(anim);
@@ -216,6 +216,7 @@ export default class Character {
 		if (this.currAnimation) {
 			this.currAnimation.stop();
 		}
+		console.log(state);
 		if (state === Character.STATE.WALKING) {
 			this.currAnimation = this.actions.WalkCycle;
 		} else if (state === Character.STATE.WAITING) {
@@ -265,23 +266,22 @@ export default class Character {
 	}
 
 	swipeRight(direction) {
-		this.changeState(Character.STATE.SWIPE_R);
 		this.swipe('SwipeR', direction);
 	}
 
 	swipeLeft(direction) {
-		this.changeState(Character.STATE.SWIPE_L);
 		this.swipe('SwipeL', direction);
 	}
 
 	swipe(state, direction) {
+		console.log(`${state}_${direction}`);
 		const action = this.actions[`${state}_${direction}`];
 		action.play();
 
 		setTimeout(() => {
 			action.stop();
 			this.returnToState();
-		}, 600);
+		}, 1000);
 	}
 
 	returnToState() {

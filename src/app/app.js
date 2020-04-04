@@ -42,7 +42,7 @@ export default class App {
 		this.forwardDown = false;
 		this.stopCameraFollowingTimeout = null;
 		this.cameraFollowing = false;
-		this.startCameraFollowing();
+		// this.startCameraFollowing();
 		window.character = this.character;
 		window.addEventListener('resize', () => {
 			this.renderer.setSize(window.innerWidth, window.innerHeight);
