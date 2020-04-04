@@ -274,14 +274,14 @@ export default class Character {
 	}
 
 	swipe(state, direction) {
-		console.log(`${state}_${direction}`);
+		this.currAnimation.stop();
 		const action = this.actions[`${state}_${direction}`];
 		action.play();
 
 		setTimeout(() => {
 			action.stop();
 			this.returnToState();
-		}, 1000);
+		}, 600);
 	}
 
 	returnToState() {
