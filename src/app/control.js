@@ -32,10 +32,7 @@ class Control {
 		this.jumpHandlers = [];
 		this.turnRightHandlers = [];
 		this.turnLeftHandlers = [];
-		this.swipeUpHandlers = [];
-		this.swipeRightHandlers = [];
-		this.swipeLeftHandlers = [];
-		this.swipeDownHandlers = [];
+		this.swipeHandlers = [];
 		this.stopMovingHandlers = [];
 		this.punchHandlers = [];
 		this.mousePosition = new THREE.Vector2();
@@ -131,10 +128,11 @@ class Control {
 					direction = 'UL';
 				}
 				if (angle >= 15 * divisions || angle < 5 * divisions) {
-					this.callHandlers(this.swipeRightHandlers, direction);
+					direction = `R_${direction}`;
 				} else {
-					this.callHandlers(this.swipeLeftHandlers, direction);
+					direction = `L_${direction}`;
 				}
+				this.callHandlers(this.swipeHandlers, direction);
 			} else {
 				this.callHandlers(this.punchHandlers);
 			}
@@ -238,17 +236,8 @@ class Control {
 	onTurnLeft(handler) {
 		this.turnLeftHandlers.push(handler);
 	}
-	onSwipeRight(handler) {
-		this.swipeRightHandlers.push(handler);
-	}
-	onSwipeLeft(handler) {
-		this.swipeLeftHandlers.push(handler);
-	}
-	onSwipeUp(handler) {
-		this.swipeUpHandlers.push(handler);
-	}
-	onSwipeDown(handler) {
-		this.swipeDownHandlers.push(handler);
+	onSwipe(handler) {
+		this.swipeHandlers.push(handler);
 	}
 	onStopMoving(handler) {
 		this.stopMovingHandlers.push(handler);

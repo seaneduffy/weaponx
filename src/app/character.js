@@ -35,17 +35,8 @@ export default class Character {
 		control.onJump(() => {
 			this.jump();
 		});
-		control.onSwipeRight((angle) => {
-			this.swipeRight(angle);
-		});
-		control.onSwipeUp((angle) => {
-			this.swipeUp(angle);
-		});
-		control.onSwipeDown((angle) => {
-			this.swipeDown(angle);
-		});
-		control.onSwipeLeft((angle) => {
-			this.swipeLeft(angle);
+		control.onSwipe((direction) => {
+			this.swipe(direction);
 		});
 	}
 
@@ -216,7 +207,6 @@ export default class Character {
 		if (this.currAnimation) {
 			this.currAnimation.stop();
 		}
-		console.log(state);
 		if (state === Character.STATE.WALKING) {
 			this.currAnimation = this.actions.WalkCycle;
 		} else if (state === Character.STATE.WAITING) {
@@ -233,10 +223,34 @@ export default class Character {
 			this.currAnimation = this.actions.PunchR;
 		} else if (state === Character.STATE.PUNCH_L) {
 			this.currAnimation = this.actions.PunchL;
-		} else if (state === Character.STATE.SWIPE_L) {
-			this.currAnimation = this.actions.SwipeL;
-		} else if (state === Character.STATE.SWIPE_R) {
-			this.currAnimation = this.actions.SwipeR;
+		} else if (state === Character.STATE.SWIPE_R_U) {
+			this.currAnimation = this.actions.SwipeR_U;
+		} else if (state === Character.STATE.SWIPE_R_UR) {
+			this.currAnimation = this.actions.SwipeR_UR;
+		} else if (state === Character.STATE.SWIPE_R_RU) {
+			this.currAnimation = this.actions.SwipeR_RU;
+		} else if (state === Character.STATE.SWIPE_R_R) {
+			this.currAnimation = this.actions.SwipeR_R;
+		} else if (state === Character.STATE.SWIPE_R_RD) {
+			this.currAnimation = this.actions.SwipeR_RD;
+		} else if (state === Character.STATE.SWIPE_R_DR) {
+			this.currAnimation = this.actions.SwipeR_DR;
+		} else if (state === Character.STATE.SWIPE_R_D) {
+			this.currAnimation = this.actions.SwipeR_D;
+		} else if (state === Character.STATE.SWIPE_L_D) {
+			this.currAnimation = this.actions.SwipeL_D;
+		} else if (state === Character.STATE.SWIPE_L_DL) {
+			this.currAnimation = this.actions.SwipeL_DL;
+		} else if (state === Character.STATE.SWIPE_L_LD) {
+			this.currAnimation = this.actions.SwipeL_LD;
+		} else if (state === Character.STATE.SWIPE_L_L) {
+			this.currAnimation = this.actions.SwipeL_L;
+		} else if (state === Character.STATE.SWIPE_L_LU) {
+			this.currAnimation = this.actions.SwipeL_LU;
+		} else if (state === Character.STATE.SWIPE_L_UL) {
+			this.currAnimation = this.actions.SwipeL_UL;
+		} else if (state === Character.STATE.SWIPE_L_U) {
+			this.currAnimation = this.actions.SwipeL_U;
 		}
 		this.currAnimation.play();
 	}
@@ -273,13 +287,9 @@ export default class Character {
 		this.swipe('SwipeL', direction);
 	}
 
-	swipe(state, direction) {
-		this.currAnimation.stop();
-		const action = this.actions[`${state}_${direction}`];
-		action.play();
-
+	swipe(direction) {
+		this.changeState(Character.STATE[`SWIPE_${direction}`]);
 		setTimeout(() => {
-			action.stop();
 			this.returnToState();
 		}, 600);
 	}
@@ -331,8 +341,18 @@ Character.STATE = {
 	LANDING: 'state_landing',
 	PUNCH_L: 'state_punch_l',
 	PUNCH_R: 'state_punch_r',
-	SWIPE_R: 'state_swipe_r',
-	SWIPE_L: 'state_swipe_l',
-	SWIPE_U: 'state_swipe_u',
-	SWIPE_D: 'state_swipe_d'
+	SWIPE_R_U: 'state_swipe_ru',
+	SWIPE_R_UR: 'state_swipe_rur',
+	SWIPE_R_RU: 'state_swipe_rru',
+	SWIPE_R_R: 'state_swipe_rr',
+	SWIPE_R_RD: 'state_swipe_rd',
+	SWIPE_R_DR: 'state_swipe_rdr',
+	SWIPE_R_D: 'state_swipe_rd',
+	SWIPE_L_D: 'state_swipe_ld',
+	SWIPE_L_DL: 'state_swipe_ldl',
+	SWIPE_L_LD: 'state_swipe_lld',
+	SWIPE_L_L: 'state_swipe_ll',
+	SWIPE_L_LU: 'state_swipe_llu',
+	SWIPE_L_UL: 'state_swipe_lul',
+	SWIPE_L_U: 'state_swipe_lu'
 };
