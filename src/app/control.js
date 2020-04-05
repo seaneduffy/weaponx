@@ -99,39 +99,56 @@ class Control {
 		const parseSwipe = () => {
 			const dist = this.firstMousePosition.distanceTo(this.mousePosition);
 			if (dist >= 20) {
-				const divisions = Math.PI / 10;
+				const divisions = Math.PI / 8;
 				let angle = this.angleVec.subVectors(this.mousePosition, this.firstMousePosition).angle();
 				let direction;
-				if (angle >= 14 * divisions && angle < 16 * divisions) {
+				// if (angle >= 14 * divisions && angle < 16 * divisions) {
+				// 	direction = 'U';
+				// } else if (angle >= 16 * divisions && angle < 17 * divisions) {
+				// 	direction = 'UR';
+				// } else if (angle >= 17 * divisions && angle < 19 * divisions) {
+				// 	direction = 'RU';
+				// } else if (angle >= 19 * divisions || angle < divisions) {
+				// 	direction = 'R';
+				// } else if (angle >= divisions && angle < 3 * divisions) {
+				// 	direction = 'RD';
+				// } else if (angle >= 3 * divisions && angle < 4 * divisions) {
+				// 	direction = 'DR';
+				// } else if (angle >= 4 * divisions && angle < 6 * divisions) {
+				// 	direction = 'D';
+				// } else if (angle >= 6 * divisions && angle < 7 * divisions) {
+				// 	direction = 'DL';
+				// } else if (angle >= 7 * divisions && angle < 9 * divisions) {
+				// 	direction = 'LD';
+				// } else if (angle >= 9 * divisions && angle < 11 * divisions) {
+				// 	direction = 'L';
+				// } else if (angle >= 11 * divisions && angle < 13 * divisions) {
+				// 	direction = 'LU';
+				// } else if (angle >= 13 * divisions && angle < 14 * divisions) {
+				// 	direction = 'UL';
+				// }
+				if (angle >= 11 * divisions && angle < 13 * divisions) {
 					direction = 'U';
-				} else if (angle >= 16 * divisions && angle < 17 * divisions) {
-					direction = 'UR';
-				} else if (angle >= 17 * divisions && angle < 19 * divisions) {
+				} else if (angle >= 13 * divisions && angle < 15 * divisions) {
 					direction = 'RU';
-				} else if (angle >= 19 * divisions || angle < divisions) {
+				} else if (angle >= 15 * divisions || angle < divisions) {
 					direction = 'R';
 				} else if (angle >= divisions && angle < 3 * divisions) {
 					direction = 'RD';
-				} else if (angle >= 3 * divisions && angle < 4 * divisions) {
-					direction = 'DR';
-				} else if (angle >= 4 * divisions && angle < 6 * divisions) {
+				} else if (angle >= 3 * divisions && angle < 5 * divisions) {
 					direction = 'D';
-				} else if (angle >= 6 * divisions && angle < 7 * divisions) {
-					direction = 'DL';
-				} else if (angle >= 7 * divisions && angle < 9 * divisions) {
+				} else if (angle >= 5 * divisions && angle < 7 * divisions) {
 					direction = 'LD';
-				} else if (angle >= 9 * divisions && angle < 11 * divisions) {
+				} else if (angle >= 7 * divisions && angle < 9 * divisions) {
 					direction = 'L';
-				} else if (angle >= 11 * divisions && angle < 13 * divisions) {
-					direction = 'LU';
-				} else if (angle >= 13 * divisions && angle < 14 * divisions) {
-					direction = 'UL';
-				}
-				if (angle >= 15 * divisions || angle < 5 * divisions) {
-					direction = `R_${direction}`;
 				} else {
-					direction = `L_${direction}`;
+					direction = 'LU';
 				}
+				// if (angle >= 15 * divisions || angle < 5 * divisions) {
+				// 	direction = `R_${direction}`;
+				// } else {
+				// 	direction = `L_${direction}`;
+				// }
 				this.callHandlers(this.swipeHandlers, direction);
 			} else {
 				this.callHandlers(this.punchHandlers);
