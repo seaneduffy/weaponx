@@ -26,21 +26,21 @@ export default class Camera {
 	    this.camera.fov = (360 / Math.PI) * Math.atan(this.tanFOV * (window.innerHeight / this.ogWindowHeight));
 	    this.camera.updateProjectionMatrix();
 	}
-	followCharacter(character) {
-		this.characterFollowing = character;
+	followSprite(sprite) {
+		this.spriteFollowing = sprite;
 	}
 	update() {
-		if (this.characterFollowing) {
+		if (this.spriteFollowing) {
 			this.tmpVec1.set(0, 0, 0);
 			this.tmpVec2.set(0, 0, 0);
 			this.tmpVec3.set(0, 0, 0);
 			this.tmpVec4.set(0, 0, 0);
-			const characterPosition = this.characterFollowing.scene.getWorldPosition(this.tmpVec1);
-			const characterDirection = this.characterFollowing.scene.getWorldDirection(this.tmpVec2);
-			const followPosition = characterDirection.negate().multiplyScalar(this.followDistance);
+			const spritePosition = this.spriteFollowing.object3d.getWorldPosition(this.tmpVec1);
+			const spriteDirection = this.spriteFollowing.object3d.getWorldDirection(this.tmpVec2);
+			const followPosition = spriteDirection.negate().multiplyScalar(this.followDistance);
 			followPosition.y += this.followHeight;
-			followPosition.add(characterPosition);
-			const lookAtPosition = this.tmpVec3.copy(characterPosition);
+			followPosition.add(spritePosition);
+			const lookAtPosition = this.tmpVec3.copy(spritePosition);
 			lookAtPosition.y = this.lookAtHeight;
 			this.lookAtVector.copy(lookAtPosition);
 			this.camera.position.copy(this.updatePosition(this.camera.position, followPosition, this.tmpVec4));

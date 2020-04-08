@@ -1,7 +1,8 @@
 import THREE from './three';
 require('three/examples/js/loaders/GLTFLoader.js');
 
-import Character from './character';
+import Logan from './logan';
+import Soldier from './soldier';
 import Camera from './camera';
 import Physics from './physics';
 
@@ -27,23 +28,27 @@ export default class App {
 		this.scene.add(this.light2);
 		this.renderer.setClearColor(0x808080);
 		this.physics = new Physics();
-		this.character = new Character();
-		this.character.loadModel('/weaponx.glb').then(() => {
-			this.scene.add(this.character.scene);
-			this.animationObjects.push(this.character);
-			this.camera.followCharacter(this.character);
-			this.character.setWalkSpeed(0.04);
-			this.character.setWalkSpeed(0.08);
-			this.character.setTurnSpeed(Math.PI / 30);
-			this.character.physicsObject = this.physics.addObject3d(this.character.scene, 'character');
+		this.logan = new Logan();
+		this.logan.model.loadModel('/weaponx.glb').then(() => {
+			this.scene.add(this.logan.object3d);
+			this.animationObjects.push(this.logan);
+			this.camera.followSprite(this.logan);
+			this.logan.physicsObject = this.physics.addObject3d(this.logan.object3d);
 			this.tick();
+			window.logan = this.logan;
+		});
+		this.soldier = new Soldier();
+		this.soldier.model.loadModel('/soldier.glb').then(() => {
+			this.scene.add(this.soldier.object3d);
+			this.animationObjects.push(this.soldier);
+			this.soldier.physicsObject = this.physics.addObject3d(this.soldier.object3d);
+			window.soldier = this.soldier;
 		});
 		this.shiftDown = false;
 		this.forwardDown = false;
 		this.stopCameraFollowingTimeout = null;
 		this.cameraFollowing = false;
 		this.startCameraFollowing();
-		window.character = this.character;
 		window.addEventListener('resize', () => {
 			this.renderer.setSize(window.innerWidth, window.innerHeight);
 			this.camera.updateViewport();
@@ -72,13 +77,14 @@ export default class App {
 	}
 	tick() {
 		this.physics.update();
-		this.character.update();
+		this.logan.update();
+		this.soldier.update();
 		if (this.cameraFollowing) {
 			this.camera.update();
 		}
 		const delta = this.clock.getDelta();
 		this.animationObjects.forEach((animationObject) => {
-			if (animationObject.animationsActive) {
+			if (animationObject.animationMixer) {
 				animationObject.animationMixer.update(delta);
 			}
 		});
