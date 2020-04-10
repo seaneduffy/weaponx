@@ -9,11 +9,6 @@ class Control {
 			turnRightDown: false,
 			jumpDown: false,
 			shiftDown: false,
-			swiping: false,
-			swipingRight: false,
-			swipingLeft: false,
-			swipingUp: false,
-			swipingDown: false,
 			mouseDown: false,
 			joystickActive: false,
 			joystickWalkThresholdHit: false,
@@ -21,7 +16,7 @@ class Control {
 			joystickTurnLeftThresholdHit: false,
 			joystickTurnRightThresholdHit: false,
 			joystickAngle: 0,
-			swipeActive: false
+			dragActive: false
 		};
 		this.joystickDimensions = {
 			width: 400,
@@ -32,9 +27,11 @@ class Control {
 		this.jumpHandlers = [];
 		this.turnRightHandlers = [];
 		this.turnLeftHandlers = [];
-		this.swipeHandlers = [];
+		this.dragReleaseHandlers = [];
 		this.stopMovingHandlers = [];
-		this.punchHandlers = [];
+		this.clickHandlers = [];
+		this.rightClickHandlers = [];
+		this.rightMouseDownHandlers = [];
 		this.mousePosition = new THREE.Vector2();
 		this.lastMousePosition = new THREE.Vector2();
 		this.firstMousePosition = new THREE.Vector2();
@@ -47,6 +44,9 @@ class Control {
 		this.joystickTurnThreshold = 30;
 		document.body.addEventListener('keydown', (key) => {
 			if (key.code === 'KeyW') {
+				if (this.state.forwardDown) {
+					return;
+				}
 				this.state.forwardDown = true;
 				if (this.state.shiftDown) {
 					this.callHandlers(this.runHandlers);
@@ -54,17 +54,29 @@ class Control {
 					this.callHandlers(this.walkHandlers);
 				}
 			} else if (key.code === 'KeyA') {
+				if (this.state.turnLeftDown) {
+					return;
+				}
 				this.callHandlers(this.turnLeftHandlers);
 				this.state.turnLeftDown = true;
 			} else if (key.code === 'KeyD') {
+				if (this.state.turnRightDown) {
+					return;
+				}
 				this.callHandlers(this.turnRightHandlers);
 				this.state.turnRightDown = true;
 			} else if (key.code === 'ShiftLeft') {
+				if (this.state.shiftDown) {
+					return;
+				}
 				this.state.shiftDown = true;
 				if (this.state.forwardDown) {
 					this.callHandlers(this.runHandlers);
 				}
 			} else if (key.code === 'Space') {
+				if (this.state.spaceDown) {
+					return;
+				}
 				this.callHandlers(this.jumpHandlers);
 				this.state.spaceDown = true;
 			}
@@ -94,39 +106,14 @@ class Control {
 		const mouseUpListener = () => {
 			document.body.removeEventListener('mousemove', mouseMoveListener);
 			document.body.removeEventListener('mouseup', mouseUpListener);
-			parseSwipe();
+			parseDrag();
 		};
-		const parseSwipe = () => {
+		const parseDrag = () => {
 			const dist = this.firstMousePosition.distanceTo(this.mousePosition);
 			if (dist >= 20) {
 				const divisions = Math.PI / 8;
 				let angle = this.angleVec.subVectors(this.mousePosition, this.firstMousePosition).angle();
 				let direction;
-				// if (angle >= 14 * divisions && angle < 16 * divisions) {
-				// 	direction = 'U';
-				// } else if (angle >= 16 * divisions && angle < 17 * divisions) {
-				// 	direction = 'UR';
-				// } else if (angle >= 17 * divisions && angle < 19 * divisions) {
-				// 	direction = 'RU';
-				// } else if (angle >= 19 * divisions || angle < divisions) {
-				// 	direction = 'R';
-				// } else if (angle >= divisions && angle < 3 * divisions) {
-				// 	direction = 'RD';
-				// } else if (angle >= 3 * divisions && angle < 4 * divisions) {
-				// 	direction = 'DR';
-				// } else if (angle >= 4 * divisions && angle < 6 * divisions) {
-				// 	direction = 'D';
-				// } else if (angle >= 6 * divisions && angle < 7 * divisions) {
-				// 	direction = 'DL';
-				// } else if (angle >= 7 * divisions && angle < 9 * divisions) {
-				// 	direction = 'LD';
-				// } else if (angle >= 9 * divisions && angle < 11 * divisions) {
-				// 	direction = 'L';
-				// } else if (angle >= 11 * divisions && angle < 13 * divisions) {
-				// 	direction = 'LU';
-				// } else if (angle >= 13 * divisions && angle < 14 * divisions) {
-				// 	direction = 'UL';
-				// }
 				if (angle >= 11 * divisions && angle < 13 * divisions) {
 					direction = 'U';
 				} else if (angle >= 13 * divisions && angle < 15 * divisions) {
@@ -144,14 +131,9 @@ class Control {
 				} else {
 					direction = 'LU';
 				}
-				// if (angle >= 15 * divisions || angle < 5 * divisions) {
-				// 	direction = `R_${direction}`;
-				// } else {
-				// 	direction = `L_${direction}`;
-				// }
-				this.callHandlers(this.swipeHandlers, direction);
+				this.callHandlers(this.dragReleaseHandlers, direction);
 			} else {
-				this.callHandlers(this.punchHandlers);
+				this.callHandlers(this.clickHandlers);
 			}
 		};
 		document.body.addEventListener('mousedown', (e) => {
@@ -161,16 +143,21 @@ class Control {
 			document.body.addEventListener('mousemove', mouseMoveListener);
 			document.body.addEventListener('mouseup', mouseUpListener);
 		});
+		document.body.addEventListener('contextmenu', (e) => {
+			e.preventDefault();
+			this.callHandlers(this.rightClickHandlers);
+			return false;
+		});
 		const parseTouches = (e) => {
 			const touches = {
 				joystickTouch: null,
-				swipeTouch: null
+				dragTouch: null
 			}
 			Array.from(e.touches).forEach(touch => {
 				if (touch.clientX < this.joystickDimensions.width && touch.clientY > window.innerHeight - this.joystickDimensions.height) {
 					touches.joystickTouch = touch;
 				} else {
-					touches.swipeTouch = touch;
+					touches.dragTouch = touch;
 				}
 			});
 			return touches;
@@ -183,7 +170,6 @@ class Control {
 				this.joystickAngleVec.subVectors(this.firstJoystickPosition, this.joystickPosition);
 				const runThresholdHit = this.joystickAngleVec.y >= this.joystickRunThreshold;
 				const walkThresholdHit = this.joystickAngleVec.y >= this.joystickWalkThreshold;
-				console.log(this.joystickAngleVec.x, this.joystickTurnThreshold);
 				this.state.turnLeftThresholdHit = this.joystickAngleVec.x >= this.joystickTurnThreshold;
 				this.state.turnRightThresholdHit = this.joystickAngleVec.x <= -this.joystickTurnThreshold;
 				if (!this.state.runThresholdHit && runThresholdHit) {
@@ -195,15 +181,9 @@ class Control {
 				}
 				this.state.runThresholdHit = runThresholdHit;
 				this.state.walkThresholdHit = walkThresholdHit;
-				// this.state.joystickRunThresholdHit = this.firstJoystickPosition.distanceTo(this.joystickPosition);
-				// this.state.joystickAngle = this.joystickAngleVec.angle();
-				// this.state.joystickAngle -= Math.PI / 2;
-				// if (this.state.joystickAngle < 0) {
-				// 	this.state.joystickAngle += 2 * Math.PI;
-				// }
 			}
-			if (touches.swipeTouch) {
-				this.mousePosition.set(touches.swipeTouch.clientX, touches.swipeTouch.clientY);
+			if (touches.dragTouch) {
+				this.mousePosition.set(touches.dragTouch.clientX, touches.dragTouch.clientY);
 			}
 		});
 		document.body.addEventListener('touchend', (e) => {
@@ -216,9 +196,9 @@ class Control {
 				this.state.turnLeftThresholdHit = false;
 				this.state.turnRightThresholdHit = false;
 			}
-			if (!touches.swipeTouch && this.state.swipeActive) {
-				this.state.swipeActive = false;
-				parseSwipe();
+			if (!touches.dragTouch && this.state.dragActive) {
+				this.state.dragActive = false;
+				parseDrag();
 			}
 		});
 		document.body.addEventListener('touchstart', (e) => {
@@ -227,9 +207,9 @@ class Control {
 				this.firstJoystickPosition.set(touches.joystickTouch.clientX, touches.joystickTouch.clientY);
 				this.state.joystickActive = true;
 			}
-			if (touches.swipeTouch) {
-				this.state.swipeActive = true;
-				this.firstMousePosition.set(touches.swipeTouch.clientX, touches.swipeTouch.clientY);
+			if (touches.dragTouch) {
+				this.state.dragActive = true;
+				this.firstMousePosition.set(touches.dragTouch.clientX, touches.dragTouch.clientY);
 			}
 		});
 	}
@@ -253,14 +233,20 @@ class Control {
 	onTurnLeft(handler) {
 		this.turnLeftHandlers.push(handler);
 	}
-	onSwipe(handler) {
-		this.swipeHandlers.push(handler);
+	onDragRelease(handler) {
+		this.dragReleaseHandlers.push(handler);
 	}
 	onStopMoving(handler) {
 		this.stopMovingHandlers.push(handler);
 	}
-	onPunch(handler) {
-		this.punchHandlers.push(handler);
+	onClick(handler) {
+		this.clickHandlers.push(handler);
+	}
+	onRightClick(handler) {
+		this.rightClickHandlers.push(handler);
+	}
+	onRightMouseDown(handler) {
+		this.rightMouseDownHandlers.push(handler);
 	}
 };
 

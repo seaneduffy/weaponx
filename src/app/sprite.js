@@ -1,5 +1,6 @@
 import timeout from './timeout';
 import { GltfModel } from './models';
+import physics from './physics';
 
 export default class Sprite {
 	constructor() {
@@ -7,6 +8,12 @@ export default class Sprite {
 		this.tmpVec1 = new THREE.Vector3();
 		this.currAnimation = null;
 		this.model = new GltfModel();
+	}
+
+	loadModel(path) {
+		return this.model.loadModel(path).then(() => {
+			this.physicsObject = physics.addObject3d(this.object3d);
+		});
 	}
 
 	get object3d() {
@@ -33,6 +40,10 @@ export default class Sprite {
 		if (velChange) {
 			this.object3d.position.add(velChange);
 		}
+	}
+
+	getHit(attack, hitbox) {
+
 	}
 
 	changeState(state) {
@@ -84,6 +95,18 @@ export default class Sprite {
 			this.currAnimation = this.actions.Stun;
 		}
 		this.currAnimation.play();
+	}
+
+	walk() {
+		this.changeState(Sprite.STATE.WALKING);
+	}
+
+	run() {
+		this.changeState(Sprite.STATE.RUNNING);
+	}
+
+	stopMoving() {
+		this.changeState(Sprite.STATE.STANDING);
 	}
 
 	jump() {

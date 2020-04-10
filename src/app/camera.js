@@ -1,6 +1,6 @@
 import THREE from './three';
 
-export default class Camera {
+class Camera {
 	constructor() {
 		this.tmpVec1 = new THREE.Vector3();
 		this.tmpVec2 = new THREE.Vector3();
@@ -12,9 +12,9 @@ export default class Camera {
 		this.ogWindowHeight = window.innerHeight;
 		this.camera.position.set(0, 2, 12);
 		this.speed = 0.7;
-		this.followDistance = 17;
-		this.followHeight = 6;
-		this.lookAtHeight = 1;
+		this.followDistance = 20;
+		this.followHeight = 15;
+		this.lookAtHeight = 2;
 		this.lookAtVector = new THREE.Vector3();
 		window.camera = this;
 		window.updateCamera = () => {
@@ -58,3 +58,5 @@ export default class Camera {
 		return target.addVectors(oldPosition, fromOldToNew);
 	}
 }
+
+export default new Camera();

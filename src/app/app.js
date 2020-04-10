@@ -3,14 +3,16 @@ require('three/examples/js/loaders/GLTFLoader.js');
 
 import Logan from './logan';
 import Soldier from './soldier';
-import Camera from './camera';
-import Physics from './physics';
+import camera from './camera';
+import physics from './physics';
+import scene from './scene';
+import combatSystem from './combat-system';
 
 export default class App {
 	constructor() {
 		this.clock = new THREE.Clock();
-		this.scene = new THREE.Scene();
-		this.camera = new Camera();
+		this.scene = scene;
+		this.camera = camera;
 		this.worldHomePosition = new THREE.Vector3(0, 2, 0);
 		this.renderer = new THREE.WebGLRenderer();
 		this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -27,21 +29,19 @@ export default class App {
 		this.scene.add(this.light1);
 		this.scene.add(this.light2);
 		this.renderer.setClearColor(0x808080);
-		this.physics = new Physics();
 		this.logan = new Logan();
-		this.logan.model.loadModel('/weaponx.glb').then(() => {
+		this.logan.loadModel('/weaponx.glb').then(() => {
 			this.scene.add(this.logan.object3d);
 			this.animationObjects.push(this.logan);
 			this.camera.followSprite(this.logan);
-			this.logan.physicsObject = this.physics.addObject3d(this.logan.object3d);
 			this.tick();
 			window.logan = this.logan;
 		});
 		this.soldier = new Soldier();
-		this.soldier.model.loadModel('/soldier.glb').then(() => {
+		this.soldier.loadModel('/soldier.glb').then(() => {
 			this.scene.add(this.soldier.object3d);
+			this.soldier.object3d.position.set(0, 0, 20);
 			this.animationObjects.push(this.soldier);
-			this.soldier.physicsObject = this.physics.addObject3d(this.soldier.object3d);
 			window.soldier = this.soldier;
 		});
 		this.shiftDown = false;
@@ -76,7 +76,7 @@ export default class App {
 		}, 1000);
 	}
 	tick() {
-		this.physics.update();
+		physics.update();
 		this.logan.update();
 		this.soldier.update();
 		if (this.cameraFollowing) {
@@ -88,6 +88,7 @@ export default class App {
 				animationObject.animationMixer.update(delta);
 			}
 		});
+		combatSystem.update();
 		this.renderer.render(this.scene, this.camera.camera);
 		requestAnimationFrame(() => {
 			this.tick();
