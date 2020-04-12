@@ -1,5 +1,6 @@
 import Hitbox from './hitbox';
 import Attack from './attack';
+import { removeFromArray } from './util';
 
 export default class CombatObject {
 	constructor(parent) {
@@ -18,15 +19,9 @@ export default class CombatObject {
 		return hitbox;
 	}
 	removeAttack(attack) {
-		let index;
-		this.attacks.forEach((att, i) => {
-			if (attack === att) {
-				attack.hitbox.box.parent.remove(attack.hitbox.box);
-				index = i;
-			}
-		});
-		if (typeof index === 'number') {
-			this.attacks.splice(index, 1);
+		const found = removeFromArray(this.attacks, attack);
+		if (found) {
+			attack.hitbox.box.parent.remove(attack.hitbox.box);
 		}
 	}
 	getHit(attack, hitbox) {

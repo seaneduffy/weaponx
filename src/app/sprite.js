@@ -12,6 +12,20 @@ export default class Sprite {
 
 	loadModel(path) {
 		return this.model.loadModel(path).then(() => {
+			this.clampAndLoopOnce(this.actions.Jump);
+			this.clampAndLoopOnce(this.actions.PunchR);
+			this.clampAndLoopOnce(this.actions.PunchL);
+			this.clampAndLoopOnce(this.actions.Land);
+			this.clampAndLoopOnce(this.actions.SwipeRU);
+			this.clampAndLoopOnce(this.actions.SwipeRD);
+			this.clampAndLoopOnce(this.actions.SwipeR);
+			this.clampAndLoopOnce(this.actions.SwipeL);
+			this.clampAndLoopOnce(this.actions.SwipeLU);
+			this.clampAndLoopOnce(this.actions.SwipeLD);
+			this.clampAndLoopOnce(this.actions.SwipeU);
+			this.clampAndLoopOnce(this.actions.SwipeD);
+			this.clampAndLoopOnce(this.actions.FiringHandgun);
+			this.clampAndLoopOnce(this.actions.Stun);
 			this.physicsObject = physics.addObject3d(this.object3d);
 		});
 	}
@@ -46,15 +60,13 @@ export default class Sprite {
 
 	}
 
-	changeState(state) {
+	changeState(state, time) {
 		if (this.state === state) {
 			return;
 		}
 		this.lastState = state;
 		this.state = state;
-		if (this.currAnimation) {
-			this.currAnimation.stop();
-		}
+		const prevAnimation = this.currAnimation;
 		if (state === Sprite.STATE.WALKING) {
 			this.currAnimation = this.actions.WalkCycle;
 		} else if (state === Sprite.STATE.WAITING) {
@@ -94,24 +106,39 @@ export default class Sprite {
 		} else if (state === Sprite.STATE.STUN) {
 			this.currAnimation = this.actions.Stun;
 		}
-		this.currAnimation.play();
+		if (prevAnimation) {
+			prevAnimation.crossFadeTo(this.currAnimation, time / 1000);
+			this.currAnimation.play();
+			timeout(time, () => {
+				prevAnimation.stop();
+			});
+		} else {
+			this.currAnimation.play();
+		}
+	}
+
+	clampAndLoopOnce(action) {
+		if (action) {
+			action.clampWhenFinished = true;
+			action.loop = THREE.LoopOnce;
+		}
 	}
 
 	walk() {
-		this.changeState(Sprite.STATE.WALKING);
+		this.changeState(Sprite.STATE.WALKING, 100);
 	}
 
 	run() {
-		this.changeState(Sprite.STATE.RUNNING);
+		this.changeState(Sprite.STATE.RUNNING, 100);
 	}
 
 	stopMoving() {
-		this.changeState(Sprite.STATE.STANDING);
+		this.changeState(Sprite.STATE.STANDING, 100);
 	}
 
 	jump() {
 		this.physicsObject.accelerate(this.tmpVec1.set(0, this.jumpSpeed, 0));
-		this.changeState(Sprite.STATE.JUMPING);
+		this.changeState(Sprite.STATE.JUMPING, 100);
 		const checkForLanding = () => {
 			if (this.object3d.position.y <= 0) {
 				this.land();
@@ -127,14 +154,14 @@ export default class Sprite {
 	}
 
 	land() {
-		this.changeState(Sprite.STATE.LANDING);
+		this.changeState(Sprite.STATE.LANDING, 50);
 		timeout(300, () => {
-			this.changeState(Sprite.STATE.STANDING);
+			this.changeState(Sprite.STATE.STANDING, 100);
 		});
 	}
 
-	returnToState() {
-		this.changeState(this.lastState);
+	returnToState(time) {
+		this.changeState(this.lastState, time);
 	}
 }
 

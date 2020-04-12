@@ -7,25 +7,33 @@ import camera from './camera';
 import physics from './physics';
 import scene from './scene';
 import combatSystem from './combat-system';
+import Blood from './blood';
+import Level from './level';
+import control from './control';
 
 export default class App {
 	constructor() {
 		this.clock = new THREE.Clock();
+		this.combatSystem = combatSystem;
+		this.physics = physics;
 		this.scene = scene;
 		this.camera = camera;
 		this.worldHomePosition = new THREE.Vector3(0, 2, 0);
 		this.renderer = new THREE.WebGLRenderer();
 		this.renderer.setSize(window.innerWidth, window.innerHeight);
 		document.body.appendChild(this.renderer.domElement);
-
+		control.init();
 		this.animationObjects = [];
 
 		this.light1 = new THREE.PointLight(0x2819e1, 1);
 		this.light2 = new THREE.PointLight(0xffffff, 1);
-		this.light1.position.set(1000, 0, 0);
-		this.light2.position.set(-1000, 0, 0);
+		this.light1.position.set(1000, 20, 0);
+		this.light2.position.set(-1000, 20, 0);
 		this.light1.lookAt(0, 0, 0);
 		this.light2.lookAt(0, 0, 0);
+		this.light3 = new THREE.DirectionalLight( 0xffffff );
+		this.light3.position.set( 0, 30, 0 );
+		this.scene.add(this.light3);
 		this.scene.add(this.light1);
 		this.scene.add(this.light2);
 		this.renderer.setClearColor(0x808080);
@@ -35,14 +43,12 @@ export default class App {
 			this.animationObjects.push(this.logan);
 			this.camera.followSprite(this.logan);
 			this.tick();
-			window.logan = this.logan;
 		});
 		this.soldier = new Soldier();
 		this.soldier.loadModel('/soldier.glb').then(() => {
 			this.scene.add(this.soldier.object3d);
 			this.soldier.object3d.position.set(0, 0, 20);
 			this.animationObjects.push(this.soldier);
-			window.soldier = this.soldier;
 		});
 		this.shiftDown = false;
 		this.forwardDown = false;
@@ -53,11 +59,24 @@ export default class App {
 			this.renderer.setSize(window.innerWidth, window.innerHeight);
 			this.camera.updateViewport();
 		});
+		const oReq = new XMLHttpRequest();
+		oReq.addEventListener('load', (e) => {
+			const levelData = JSON.parse(e.target.response);
+			const level = new Level(levelData);
+			this.scene.add(level.object3d);
+		});
+		oReq.open('GET', '/level1.json');
+		oReq.send();
+
+		window.app = this;
 
 		// Optional: Provide a DRACOLoader instance to decode compressed mesh data
 		// var dracoLoader = new DRACOLoader();
 		// dracoLoader.setDecoderPath( '/examples/jsm/libs/draco/' );
 		// loader.setDRACOLoader( dracoLoader );
+	}
+	clearBlood() {
+		Blood.clearBlood();
 	}
 	startCameraFollowing() {
 		this.cameraFollowing = true;
@@ -76,7 +95,7 @@ export default class App {
 		}, 1000);
 	}
 	tick() {
-		physics.update();
+		this.physics.update();
 		this.logan.update();
 		this.soldier.update();
 		if (this.cameraFollowing) {

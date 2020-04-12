@@ -11,7 +11,7 @@ export default class Logan extends Sprite {
 		super();
 		this.walkSpeed = 0.04;
 		this.runSpeed = 0.32;
-		this.turnSpeed = Math.PI / 30;
+		this.turnSpeed = Math.PI / 180 * 1.2;
 		this.jumpSpeed = 1.2;
 		this.punchSpeed = 0.3;
 		this.swipeSpeed = 0.5;
@@ -38,6 +38,11 @@ export default class Logan extends Sprite {
 		control.onDragRelease((direction) => {
 			this.swipe(direction);
 		});
+		control.onTurn(amount => {
+			if (this.object3d) {
+				this.object3d.rotation.y += this.turnSpeed * -amount;
+			}
+		});
 	}
 	loadModel(path) {
 		return super.loadModel(path).then(() => {
@@ -63,13 +68,13 @@ export default class Logan extends Sprite {
 		}
 		super.update(velChange);
 	}
-	returnToState() {
+	returnToState(time) {
 		if (control.state.shiftDown && control.state.forwardDown) {
-			this.changeState(Sprite.STATE.RUNNING);
+			this.changeState(Sprite.STATE.RUNNING, time);
 		} else if (control.state.forwardDown) {
-			this.changeState(Sprite.STATE.WALKING);
+			this.changeState(Sprite.STATE.WALKING, time);
 		} else {
-			this.changeState(Sprite.STATE.STANDING);
+			this.changeState(Sprite.STATE.STANDING, time);
 		}
 	}
 	swipe(direction) {
@@ -81,7 +86,7 @@ export default class Logan extends Sprite {
 		timeout(250, () => {
 			this.physicsObject.accelerate(velChange);
 		});
-		this.changeState(Sprite.STATE[`SWIPE_${direction}`]);
+		this.changeState(Sprite.STATE[`SWIPE_${direction}`], 100);
 		let bone;
 		if (direction === 'U') {
 			this.swipeDirectionVec.set(0, 1, 0);
@@ -111,8 +116,8 @@ export default class Logan extends Sprite {
 		this.swipeDirectionVec.applyQuaternion(this.object3d.quaternion);
 		const attack = this.combatObject.addAttack(Attack.TYPE.CLAW, 0.2, 1, 0.2, bone, 0, 0.6, 0);
 		attack.direction = this.swipeDirectionVec;
-		timeout(1000, () => {
-			this.returnToState();
+		timeout(900, () => {
+			this.returnToState(100);
 			this.attacking = false;
 			this.combatObject.removeAttack(attack);
 		});
@@ -126,10 +131,13 @@ export default class Logan extends Sprite {
 		timeout(250, () => {
 			this.physicsObject.accelerate(velChange);
 		});
-		this.changeState(Sprite.STATE.PUNCH_R);
-		timeout(1000, () => {
-			this.returnToState();
-			this.attacking = false;
+		this.changeState(Sprite.STATE.PUNCH_R, 100);
+		timeout(400, () => {
+			this.changeState(Sprite.STATE.PUNCH_L, 200);
+			timeout(500, () => {
+				this.returnToState(100);
+				this.attacking = false;
+			});
 		});
 	}
 	run() {

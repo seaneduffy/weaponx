@@ -5,21 +5,12 @@ class Camera {
 		this.tmpVec1 = new THREE.Vector3();
 		this.tmpVec2 = new THREE.Vector3();
 		this.tmpVec3 = new THREE.Vector3();
-		this.tmpVec4 = new THREE.Vector3();
-		this.tmpVec5 = new THREE.Vector3();
+		this.speed = 0.2;
 		this.camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 0.01, 1000);
 		this.tanFOV = Math.tan(((Math.PI / 180 ) * this.camera.fov / 2));
 		this.ogWindowHeight = window.innerHeight;
-		this.camera.position.set(0, 2, 12);
-		this.speed = 0.7;
-		this.followDistance = 20;
-		this.followHeight = 15;
-		this.lookAtHeight = 2;
-		this.lookAtVector = new THREE.Vector3();
-		window.camera = this;
-		window.updateCamera = () => {
-			this.update();
-		};
+		window.followPosition = this.followPosition = new THREE.Vector3(-3, 3.5, -10);
+		window.lookAtPosition = this.lookAtPosition = new THREE.Vector3(0, 3.5, 3);
 	}
 	updateViewport() {
 		this.camera.aspect = window.innerWidth / window.innerHeight;
@@ -31,20 +22,14 @@ class Camera {
 	}
 	update() {
 		if (this.spriteFollowing) {
-			this.tmpVec1.set(0, 0, 0);
-			this.tmpVec2.set(0, 0, 0);
-			this.tmpVec3.set(0, 0, 0);
-			this.tmpVec4.set(0, 0, 0);
-			const spritePosition = this.spriteFollowing.object3d.getWorldPosition(this.tmpVec1);
-			const spriteDirection = this.spriteFollowing.object3d.getWorldDirection(this.tmpVec2);
-			const followPosition = spriteDirection.negate().multiplyScalar(this.followDistance);
-			followPosition.y += this.followHeight;
-			followPosition.add(spritePosition);
-			const lookAtPosition = this.tmpVec3.copy(spritePosition);
-			lookAtPosition.y = this.lookAtHeight;
-			this.lookAtVector.copy(lookAtPosition);
-			this.camera.position.copy(this.updatePosition(this.camera.position, followPosition, this.tmpVec4));
-			this.camera.lookAt(this.lookAtVector);
+			const object3d = this.spriteFollowing.object3d;
+			this.tmpVec1.copy(this.followPosition);
+			this.tmpVec2.copy(this.lookAtPosition);
+			this.tmpVec1.applyQuaternion(object3d.quaternion);
+			this.tmpVec2.applyQuaternion(object3d.quaternion);
+			this.tmpVec2.add(object3d.position);
+			this.camera.position.addVectors(object3d.position, this.tmpVec1);
+			this.camera.lookAt(this.tmpVec2);
 		}
 	}
 	updatePosition(oldPosition, newPosition, target) {
