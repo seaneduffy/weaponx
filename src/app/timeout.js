@@ -1,15 +1,19 @@
 export default (d, callback) => {
   const delay = typeof d === 'number' ? d : convertToMilliseconds(d);
   const startTime = new Date().getTime();
+  let canceled = false;
   const check = () => {
     const time = new Date().getTime();
-    if (time - startTime >= delay) {
+    if (!canceled && time - startTime >= delay) {
       callback();
-    } else {
+    } else if (!canceled) {
       requestAnimationFrame(check);
     }
   };
   requestAnimationFrame(check);
+  return () => {
+    canceled = true;
+  }
 };
 
 const convertToMilliseconds = (t) => {

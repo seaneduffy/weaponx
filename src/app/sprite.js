@@ -8,6 +8,7 @@ export default class Sprite {
 		this.tmpVec1 = new THREE.Vector3();
 		this.currAnimation = null;
 		this.model = new GltfModel();
+		this.animationFadeTime = 50;
 	}
 
 	loadModel(path) {
@@ -15,6 +16,9 @@ export default class Sprite {
 			this.clampAndLoopOnce(this.actions.Jump);
 			this.clampAndLoopOnce(this.actions.PunchR);
 			this.clampAndLoopOnce(this.actions.PunchL);
+			this.clampAndLoopOnce(this.actions.UppercutR);
+			this.clampAndLoopOnce(this.actions.CrossL);
+			this.clampAndLoopOnce(this.actions.DowncutL);
 			this.clampAndLoopOnce(this.actions.Land);
 			this.clampAndLoopOnce(this.actions.SwipeRU);
 			this.clampAndLoopOnce(this.actions.SwipeRD);
@@ -61,9 +65,6 @@ export default class Sprite {
 	}
 
 	changeState(state, time) {
-		if (this.state === state) {
-			return;
-		}
 		this.lastState = state;
 		this.state = state;
 		const prevAnimation = this.currAnimation;
@@ -105,7 +106,14 @@ export default class Sprite {
 			this.currAnimation = this.actions.FiringHandgun;
 		} else if (state === Sprite.STATE.STUN) {
 			this.currAnimation = this.actions.Stun;
+		} else if (state === Sprite.STATE.UPPERCUT_R) {
+			this.currAnimation = this.actions.UppercutR;
+		} else if (state === Sprite.STATE.DOWNCUT_L) {
+			this.currAnimation = this.actions.DowncutL;
+		} else if (state === Sprite.STATE.CROSS_L) {
+			this.currAnimation = this.actions.CrossL;
 		}
+
 		if (prevAnimation) {
 			prevAnimation.crossFadeTo(this.currAnimation, time / 1000);
 			this.currAnimation.play();
@@ -125,20 +133,20 @@ export default class Sprite {
 	}
 
 	walk() {
-		this.changeState(Sprite.STATE.WALKING, 100);
+		this.changeState(Sprite.STATE.WALKING, this.animationFadeTime);
 	}
 
 	run() {
-		this.changeState(Sprite.STATE.RUNNING, 100);
+		this.changeState(Sprite.STATE.RUNNING, this.animationFadeTime);
 	}
 
 	stopMoving() {
-		this.changeState(Sprite.STATE.STANDING, 100);
+		this.changeState(Sprite.STATE.STANDING, this.animationFadeTime);
 	}
 
 	jump() {
 		this.physicsObject.accelerate(this.tmpVec1.set(0, this.jumpSpeed, 0));
-		this.changeState(Sprite.STATE.JUMPING, 100);
+		this.changeState(Sprite.STATE.JUMPING, this.animationFadeTime);
 		const checkForLanding = () => {
 			if (this.object3d.position.y <= 0) {
 				this.land();
@@ -156,7 +164,7 @@ export default class Sprite {
 	land() {
 		this.changeState(Sprite.STATE.LANDING, 50);
 		timeout(300, () => {
-			this.changeState(Sprite.STATE.STANDING, 100);
+			this.changeState(Sprite.STATE.STANDING, this.animationFadeTime);
 		});
 	}
 
@@ -184,5 +192,8 @@ Sprite.STATE = {
 	SWIPE_D: 'state_swipe_d',
 	AIMING_HANDGUN: 'state_aim',
 	FIRING_HANDGUN: 'state_fire_handgun',
-	STUN: 'state_stun'
+	STUN: 'state_stun',
+	UPPERCUT_R: 'state_uppercut_r',
+	CROSS_L: 'state_cross_l',
+	DOWNCUT_L: 'state_downcut_l'
 };

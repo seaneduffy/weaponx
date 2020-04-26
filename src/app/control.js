@@ -1,12 +1,10 @@
 import THREE from './three';
 
 class Control {
-	init() {
+	constructor() {
 		this.state = {
 			forwardDown: false,
 			shiftDown: false,
-			// turnLeftDown: false,
-			// turnRightDown: false,
 			jumpDown: false,
 			shiftDown: false,
 			mouseDown: false,
@@ -30,11 +28,9 @@ class Control {
 		this.turnHandlers = [];
 		this.moveLeftHandlers = [];
 		this.moveRightHandlers = [];
-		// this.turnRightHandlers = [];
-		// this.turnLeftHandlers = [];
 		this.dragReleaseHandlers = [];
 		this.stopMovingHandlers = [];
-		this.clickHandlers = [];
+		this.attackHandlers = [];
 		this.rightClickHandlers = [];
 		this.rightMouseDownHandlers = [];
 		this.mousePosition = new THREE.Vector2();
@@ -47,6 +43,8 @@ class Control {
 		this.joystickRunThreshold = 100;
 		this.joystickWalkThreshold = 30;
 		this.joystickTurnThreshold = 30;
+	}
+	init() {
 		const mouseElement = document.body.querySelector('canvas');
 		document.body.addEventListener('keydown', (key) => {
 			if (key.code === 'KeyW') {
@@ -105,8 +103,8 @@ class Control {
 		mouseElement.addEventListener('mousemove', (e) => {
 			this.lastMousePosition.x = this.mousePosition.x;
 			this.lastMousePosition.y = this.mousePosition.y;
-			this.mousePosition.x = e.screenX;
-			this.mousePosition.y = e.screenY;
+			this.mousePosition.x = this.mousePosition.x + e.movementX; // e.screenX;
+			this.mousePosition.y = this.mousePosition.y + e.movementY; // e.screenY;
 			this.callHandlers(this.turnHandlers, this.mousePosition.x - this.lastMousePosition.x);
 		});
 		const mouseUpListener = () => {
@@ -138,13 +136,13 @@ class Control {
 				}
 				this.callHandlers(this.dragReleaseHandlers, direction);
 			} else {
-				this.callHandlers(this.clickHandlers);
+				this.callHandlers(this.attackHandlers);
 			}
 		};
 		mouseElement.addEventListener('mousedown', (e) => {
 			this.state.mouseDown = true;
-			this.firstMousePosition.x = this.lastMousePosition.x = this.mousePosition.x = e.screenX;
-			this.firstMousePosition.y = this.lastMousePosition.y = this.mousePosition.y = e.screenY;
+			this.firstMousePosition.x = this.lastMousePosition.x = this.mousePosition.x = 0;// e.screenX;
+			this.firstMousePosition.y = this.lastMousePosition.y = this.mousePosition.y = 0;// e.screenY;
 			mouseElement.addEventListener('mouseup', mouseUpListener);
 		});
 		// mouseElement.addEventListener('contextmenu', (e) => {
@@ -231,12 +229,6 @@ class Control {
 	onJump(handler) {
 		this.jumpHandlers.push(handler);
 	}
-	// onTurnRight(handler) {
-	// 	this.turnRightHandlers.push(handler);
-	// }
-	// onTurnLeft(handler) {
-	// 	this.turnLeftHandlers.push(handler);
-	// }
 	onMoveLeft(handler) {
 		this.moveLeftHandlers.push(handler);
 	}
@@ -252,8 +244,8 @@ class Control {
 	onStopMoving(handler) {
 		this.stopMovingHandlers.push(handler);
 	}
-	onClick(handler) {
-		this.clickHandlers.push(handler);
+	onAttack(handler) {
+		this.attackHandlers.push(handler);
 	}
 	onRightClick(handler) {
 		this.rightClickHandlers.push(handler);

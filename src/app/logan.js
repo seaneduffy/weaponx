@@ -13,12 +13,55 @@ export default class Logan extends Sprite {
 		this.runSpeed = 0.32;
 		this.turnSpeed = Math.PI / 180 * 1.2;
 		this.jumpSpeed = 1.2;
-		this.punchSpeed = 0.3;
 		this.swipeSpeed = 0.5;
-		this.attacking = false;
+		this.firstAttackWindow = true;
+		this.secondAttackWindow = false;
+		this.thirdAttackWindow = false;
+		this.fourthAttackWindow = false;
+		this.fifthAttackWindow = false;
+		this.attackWindow = 0;
+		this.attackWindowActive = true;
+		this.attackQueued = false;
 		this.velChange = new THREE.Vector3();
 		this.swipeDirectionVec = new THREE.Vector3();
 		this.directionVec = new THREE.Vector3();
+		this.attacks = [
+			{
+				attackState: Sprite.STATE.PUNCH_L,
+				forwardMovement: 0.3,
+				timeBeforeMove: 100,
+				timeBeforeWindow: 50,
+				attackTime: 875
+			},
+			{
+				attackState: Sprite.STATE.PUNCH_R,
+				forwardMovement: 0.3,
+				timeBeforeMove: 100,
+				timeBeforeWindow: 50,
+				attackTime: 875
+			},
+			{
+				attackState: Sprite.STATE.CROSS_L,
+				forwardMovement: 0.3,
+				timeBeforeMove: 100,
+				timeBeforeWindow: 50,
+				attackTime: 1083
+			},
+			{
+				attackState: Sprite.STATE.UPPERCUT_R,
+				forwardMovement: 0.3,
+				timeBeforeMove: 100,
+				timeBeforeWindow: 50,
+				attackTime: 1083
+			},
+			{
+				attackState: Sprite.STATE.DOWNCUT_L,
+				forwardMovement: 0.3,
+				timeBeforeMove: 100,
+				timeBeforeWindow: 50,
+				attackTime: 1083
+			}
+		];
 
 		control.onWalk(() => {
 			this.walk();
@@ -29,8 +72,8 @@ export default class Logan extends Sprite {
 		control.onRun(() => {
 			this.run();
 		});
-		control.onClick(() => {
-			this.punch();
+		control.onAttack(() => {
+			this.attack();
 		});
 		control.onJump(() => {
 			this.jump();
@@ -86,7 +129,7 @@ export default class Logan extends Sprite {
 		timeout(250, () => {
 			this.physicsObject.accelerate(velChange);
 		});
-		this.changeState(Sprite.STATE[`SWIPE_${direction}`], 100);
+		this.changeState(Sprite.STATE[`SWIPE_${direction}`], this.animationFadeTime);
 		let bone;
 		if (direction === 'U') {
 			this.swipeDirectionVec.set(0, 1, 0);
@@ -122,23 +165,57 @@ export default class Logan extends Sprite {
 			this.combatObject.removeAttack(attack);
 		});
 	}
-	punch() {
-		if (this.attacking) {
-			return;
+	attack() {
+		if (this.attackWindowActive && this.attackWindow === 0) {
+			this.doAttack();
+		} else if (this.attackWindowActive) {
+			this.attackQueued = true;
 		}
-		this.attacking = true;
-		const velChange = this.object3d.getWorldDirection(this.velChange).multiplyScalar(this.punchSpeed);
-		timeout(250, () => {
+	}
+	doAttack() {
+		this.attackWindowActive = false;
+		const { attackState, forwardMovement, timeBeforeMove, timeBeforeWindow, attackTime } = this.attacks[this.attackWindow];
+		const velChange = this.object3d.getWorldDirection(this.velChange).multiplyScalar(forwardMovement);
+		timeout(timeBeforeMove, () => {
 			this.physicsObject.accelerate(velChange);
 		});
-		this.changeState(Sprite.STATE.PUNCH_R, 100);
-		timeout(400, () => {
-			this.changeState(Sprite.STATE.PUNCH_L, 200);
-			timeout(500, () => {
-				this.returnToState(100);
-				this.attacking = false;
-			});
+		this.changeState(attackState, this.animationFadeTime);
+		this.attackWindow += 1;
+		if (this.attackWindow > this.attacks.length - 1) {
+			this.attackWindow = 0;
+		}
+		timeout(attackTime - this.animationFadeTime, () => {
+			if (this.attackQueued) {
+				this.attackQueued = false;
+				this.doAttack();
+			} else {
+				this.attackWindowActive = false;
+				this.returnToState(this.animationFadeTime);
+				this.attackWindow = 0;
+				timeout(this.animationFadeTime, () => {
+					this.attackWindowActive = true;
+				});
+			}
 		});
+		timeout(timeBeforeWindow, () => {
+			this.attackWindowActive = true;
+		});
+	}
+	firstAttack() {
+		this.firstAttackWindow = false;
+
+	}
+	secondAttack() {
+
+	}
+	thirdAttack() {
+
+	}
+	fourthAttack() {
+
+	}
+	fifthAttack() {
+
 	}
 	run() {
 		if (this.attacking) {

@@ -21,10 +21,8 @@ export default class App {
 		this.worldHomePosition = new THREE.Vector3(0, 2, 0);
 		this.renderer = new THREE.WebGLRenderer();
 		this.renderer.setSize(window.innerWidth, window.innerHeight);
-		document.body.appendChild(this.renderer.domElement);
-		control.init();
+		this.startButton = document.body.querySelector('button');
 		this.animationObjects = [];
-
 		this.light1 = new THREE.PointLight(0x2819e1, 1);
 		this.light2 = new THREE.PointLight(0xffffff, 1);
 		this.light1.position.set(1000, 20, 0);
@@ -42,7 +40,15 @@ export default class App {
 			this.scene.add(this.logan.object3d);
 			this.animationObjects.push(this.logan);
 			this.camera.followSprite(this.logan);
-			this.tick();
+			this.startButton.addEventListener('click', () => {
+				document.body.appendChild(this.renderer.domElement);
+				this.tick();
+				this.renderer.domElement.requestPointerLock = this.renderer.domElement.requestPointerLock ||
+					this.renderer.domElement.mozRequestPointerLock;
+				this.renderer.domElement.requestPointerLock();
+				control.init();
+				this.startButton.style.display = 'none';
+			});
 		});
 		this.soldier = new Soldier();
 		this.soldier.loadModel('/soldier.glb').then(() => {
